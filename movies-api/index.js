@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import usersRouter from './api/users/index.js';
 import './db/index.js';
+import moviesRouter from './api/movies';   
 
 
 
@@ -16,6 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/users', usersRouter);
+app.use('/api/movies', moviesRouter); 
 
 
 
