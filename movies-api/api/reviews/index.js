@@ -36,7 +36,7 @@ router.get('/user', asyncHandler(async (req, res) => {
 
 router.post('/', asyncHandler(async (req, res) => {
   try {
-    const authHeader = req.headersauthorization;
+    const authHeader = req.headers.authorization;
     if (!authHeader) {
       return res.status(401).json({ success: false, msg: 'No token provided.' });
     }
@@ -70,32 +70,34 @@ router.put('/:id', asyncHandler(async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({ msg: 'No token provided.' });
+      return res.status(401).json({ success: false, msg: 'No token provided.' });
     }
 
     const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, process.env.SECRET);
 
     const review = await Review.findById(req.params.id);
+
     if (!review) {
-      return res.status(404).json({ msg: 'Review not found.' });
+      return res.status(404).json({ success: false, msg: 'Review not found.' });
     }
 
     if (review.username !== decoded.username) {
-      return res.status(403).json({ msg: 'Not authorised.' });
+      return res.status(403).json({ success: false, msg: 'Not authorised to update this review.' });
     }
 
-    review.content = req.body.content;
-    review.rating = Number(req.body.rating);
+    review.content = req.body.content ?? review.content;
+    review.rating = req.body.rating ?? review.rating;
 
     await review.save();
 
     res.status(200).json({ success: true, review });
   } catch (error) {
     console.error(error);
-    res.status(401).json({ msg: 'Invalid token.' });
+    res.status(401).json({ success: false, msg: 'Invalid token.' });
   }
 }));
+
 
 router.delete('/:id', asyncHandler(async (req, res) => {
   try {
