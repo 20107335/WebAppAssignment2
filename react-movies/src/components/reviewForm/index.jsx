@@ -1,4 +1,3 @@
-
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
@@ -7,31 +6,31 @@ import Box from "@mui/material/Box";
 import { useForm, Controller } from "react-hook-form";
 import React, { useState, useContext } from "react";
 import { MoviesContext } from "../../contexts/moviesContext";
+import { AuthContext } from "../../contexts/authenticationContext";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
-import { useNavigate } from "react-router";
-
+import { useNavigate } from "react-router-dom";
 
 const ratings = [
   {
     value: 5,
-    label: "Excellent",
+    label: "Excellent (5/5)",
   },
   {
     value: 4,
-    label: "Good",
+    label: "Good (4/5)",
   },
   {
     value: 3,
-    label: "Average",
+    label: "Average (3/5)",
   },
   {
     value: 2,
-    label: "Poor",
+    label: "Poor (2/5)",
   },
   {
-    value: 0,
-    label: "Terrible",
+    value: 1,
+    label: "Terrible (1/5)",
   },
 ];
 
@@ -62,16 +61,14 @@ const styles = {
   },
 };
 
-
-
 const ReviewForm = ({ movie }) => {
-      const context = useContext(MoviesContext);
-
-  const [rating, setRating] = useState(3);
-    const [open, setOpen] = useState(false); 
+  const context = useContext(MoviesContext);
+  const { isAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate();
-
   
+  const [rating, setRating] = useState(3);
+  const [open, setOpen] = useState(false); 
+
   const defaultValues = {
     author: "",
     review: "",
@@ -90,20 +87,64 @@ const ReviewForm = ({ movie }) => {
     setRating(event.target.value);
   };
 
-     const onSubmit = (review) => {
-    review.movieId = movie.id;
-    review.rating = rating;
-    // console.log(review);
-    context.addReview(movie, review);
-    setOpen(true); // NEW
+  const onSubmit = async (review) => {
+    if (!isAuthenticated) {
+      alert("Please login to submit a review");
+      return;
+    }
+
+    try {
+      const rawToken = localStorage.getItem("token");
+      if (!rawToken) {
+        alert("No token found. Please login again.");
+        return;
+      }
+
+      const token = rawToken.startsWith("BEARER ") ? rawToken.substring(7) : rawToken;
+
+      const response = await fetch("http://localhost:8080/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `BEARER ${token}`
+        },
+        body: JSON.stringify({
+          movieId: movie.id,
+          author: review.author,
+          content: review.review,
+          rating: rating
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit review");
+      }
+
+      const data = await response.json();
+      setOpen(true);
+      
+    } catch (error) {
+      alert("Failed to submit review. Please try again.");
+    }
   };
 
-    const handleSnackClose = (event) => {
+  const handleSnackClose = (event) => {
     setOpen(false);
-    navigate("/movies/favorites");
+    navigate(-1);
   };
 
-
+  if (!isAuthenticated) {
+    return (
+      <Box component="div" sx={styles.root}>
+        <Typography component="h2" variant="h3">
+          Write a review
+        </Typography>
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Please <Button component="a" href="/login">login</Button> to submit a review
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box component="div" sx={styles.root}>
@@ -111,7 +152,7 @@ const ReviewForm = ({ movie }) => {
         Write a review
       </Typography>
 
-            <Snackbar
+      <Snackbar
         sx={styles.snack}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
         open={open}
@@ -127,7 +168,6 @@ const ReviewForm = ({ movie }) => {
           </Typography>
         </MuiAlert>
       </Snackbar>
-
 
       <form sx={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
         <Controller
@@ -160,7 +200,7 @@ const ReviewForm = ({ movie }) => {
           control={control}
           rules={{
             required: "Review cannot be empty.",
-            minLength: { value: 10, message: "Review is too short" },
+            minLength: { value: 5, message: "Review is too short" },
           }}
           defaultValue=""
           render={({ field: { onChange, value } }) => (
@@ -196,7 +236,7 @@ const ReviewForm = ({ movie }) => {
               label="Rating Select"
               value={rating}
               onChange={handleRatingChange}
-              helperText="Don't forget your rating"
+              helperText="Rating out of 5"
             >
               {ratings.map((option) => (
                 <MenuItem key={option.value} value={option.value}>

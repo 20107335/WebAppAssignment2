@@ -21,7 +21,9 @@ import UpcomingMoviesPage from "./pages/upcomingMoviesPage";
 import MovieGenresPage from "./pages/movieGenresPage";
 import LoginPage from "./pages/loginPage";
 import SignupPage from "./pages/signupPage";
+import UserReviewsPage from "./pages/userReviewsPage";
 import { AuthProvider } from "./contexts/authenticationContext";
+import UpdateUserReviewPage from "./pages/updateUserReviewPage";
 
 
 
@@ -62,6 +64,8 @@ const App = () => {
                 <Route path="/movies/genres" element={<MovieGenresPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                <Route path="/my-reviews" element={<UserReviewsPage/>} />
+                <Route path="/my-reviews/edit/:id" element={<UpdateUserReviewPage />} />
               </Routes>
             </PlaylistContextProvider>
           </MoviesContextProvider>

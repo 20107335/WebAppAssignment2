@@ -38,6 +38,7 @@ const SiteHeader = () => {
   const protectedOptions = [
     { label: "Favorites", path: "/movies/favorites" },
     { label: "Playlist", path: "/movies/playlist" },
+    {label: "My Reviews", path: "/my-reviews"}
   ];
 
   const handleMenuSelect = (pageURL) => {

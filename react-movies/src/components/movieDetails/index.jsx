@@ -6,12 +6,16 @@ import StarRate from "@mui/icons-material/StarRate";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import Fab from "@mui/material/Fab";
 import Typography from "@mui/material/Typography";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Drawer from "@mui/material/Drawer";
 import MovieReviews from "../movieReviews";
 import LanguageIcon from '@mui/icons-material/Language';
 import MovieCast from "../movieCast";
 import MovieRecommendations from "../movieRecommendations";
+import UserReviews from "../userReviews";
+import AddIcon from '@mui/icons-material/Add';
+import { Link } from "react-router-dom";
+import { AuthContext } from "../../contexts/authenticationContext";
 
 const root = {
     display: "flex",
@@ -25,6 +29,12 @@ const chip = { margin: 0.5 };
 
 const MovieDetails = ({ movie }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [refreshReviews, setRefreshReviews] = useState(0);
+  const { isAuthenticated } = useContext(AuthContext);
+
+  const handleReviewSubmitted = () => {
+    setRefreshReviews(prev => prev + 1);
+  };
 
   return (
     <>
@@ -78,6 +88,8 @@ const MovieDetails = ({ movie }) => {
       <MovieCast movieId={movie.id} />
       <MovieRecommendations movieId={movie.id} />
 
+      <UserReviews movieId={movie.id} refreshTrigger={refreshReviews} />
+
       <Fab
         color="secondary"
         variant="extended"
@@ -89,8 +101,29 @@ const MovieDetails = ({ movie }) => {
         }}
       >
         <NavigationIcon />
-        Reviews
+        TMDB Reviews
       </Fab>
+
+      {isAuthenticated && (
+        <Fab
+          component={Link}
+          to="/reviews/form"
+          state={{ 
+            movieId: movie.id
+          }}
+          color="primary"
+          variant="extended"
+          sx={{
+            position: 'fixed',
+            bottom: '5em',
+            right: '1em'
+          }}
+        >
+          <AddIcon />
+          Add Review
+        </Fab>
+      )}
+
       <Drawer anchor="top" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
         <MovieReviews movie={movie} />
       </Drawer>
