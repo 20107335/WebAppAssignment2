@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { AuthContext } from "../contexts/authenticationContext";
 
+//login handler
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
@@ -21,7 +22,7 @@ const LoginPage = () => {
     e.preventDefault();
     setError("");
 
-    if (!username || !password) {
+    if   (!username || !password) {
       setError("Please enter both username and password");
       return;
     }
