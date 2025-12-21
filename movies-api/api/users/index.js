@@ -3,15 +3,15 @@ import User from './userModel.js';
 import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 
-const router = express.Router(); // eslint-disable-line
+const router = express.Router();
 
-// Get all users
+
 router.get('/', async (req, res) => {
     const users = await User.find();
     res.status(200).json(users);
 });
 
-// register(Create)/Authenticate User
+
 router.post('/', asyncHandler(async (req, res) => {
     try {
         if (!req.body.username || !req.body.password) {
