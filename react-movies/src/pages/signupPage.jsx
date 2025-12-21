@@ -43,7 +43,7 @@ const SignupPage = () => {
         return;
       }
 
-      // Successful signup → redirect to login
+      // Successful signup, redirect to login
       navigate("/login");
     } catch (err) {
       setError("Signup failed. Please try again.");
